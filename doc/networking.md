@@ -196,3 +196,60 @@ for updating Protocol Buffers messages. The same principles of "add but don't
 modify or remove fields" carry over to gRPC service definitions: new services
 can be added, but names should not be changed, nor should services be removed
 unless the intent is to break backwards compatibility.
+
+
+# Redeemer networking spec 
+
+### gRPC `QueueTicket`: `Ticket` -> `QueueTicketRes`
+
+`QueueTicket` is a unary RPC method that is called by an Orchestrator to send a winning ticket to the `Redeemer`. The request message has following format: 
+
+```
+message Ticket {
+    TicketParams ticket_params = 1;
+    bytes sender = 2;
+    TicketExpirationParams expiration_params = 3;
+    TicketSenderParams sender_params = 4;
+    bytes recipient_rand = 5;
+}
+```
+
+The `Redeemer` will send back an empty message, `QueueTicketRes` on success as well as a `200 OK` status. Upon error a `500 Internal Server Error` error code will be returned along side the error. 
+
+### gRPC `MaxFloat`: `MaxFloatReq` -> `MaxFloatUpdate`
+
+`MaxFloat` is a unary RPC method that is called by an Orchestrator when it requires the max float for a sender but no local cache is available. It's request takes in a sender's ethereum address:
+
+```
+message MaxFloatReq {
+    bytes sender = 1;
+}
+```
+
+The server will respond with the `MaxFloat` for that `sender` in raw bytes format:
+
+```
+message MaxFloatUpdate {
+    bytes max_float= 2;
+}
+```
+
+### gRPC `MonitorMaxFloat`: `MaxFloatReq` -> stream `MaxFloatUpdate`
+
+`MonitorMaxFloat` is a server-side streming RPC method that is called by an Orchestrator to receive indirect max float updates for a sender. The stream will remain open until either the client or the server closes the stream or connection. 
+
+The request follows the same format as the `Maxfloat` method:
+
+```
+message MaxFloatReq {
+    bytes sender = 1;
+}
+```
+
+The response message also follows the same format but is now _stream_  of `MaxFloatUpdate` messages: 
+
+```
+message MaxFloatUpdate {
+    bytes max_float= 2;
+}
+```
