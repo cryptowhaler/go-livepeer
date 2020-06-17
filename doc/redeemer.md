@@ -30,7 +30,7 @@ _Max float_ is the guaranteed value an Orchestrator will be able to claim from a
 
 _If this call fails the response from step 1 is returned, but not kept in cache to prevent duplicate streams_
 
-3. The `Redeemer` go routine started by the RPC call in step 2 will start a subscription to listen for max float changes from the `LocalSenderMonitor` for the specified `sender` using `LocalSenderMonitor.SubscribeMaxFloatChange(sender)`.
+3. The `Redeemer` goroutine started by the RPC call in step 2 will start a subscription to listen for max float changes from the `LocalSenderMonitor` for the specified `sender` using `LocalSenderMonitor.SubscribeMaxFloatChange(sender)`.
 
 _Each open server-side stream will have its own subscription that will be closed when the client closes the stream. This means that each client will have a subscription for each sender it is interested in._ 
 
