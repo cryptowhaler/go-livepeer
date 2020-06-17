@@ -4,7 +4,7 @@ The Ticket Redemption Service allows Orchestrator nodes to redeem winning ticket
 
 It is responsible for redeeming winning tickets as well as pushing _max float_ updates about broadcasters back to its connected Orchestrators.
 
-_Max float_ is the guaranteed value an Orchestrator will be able from a Broadcaster's reserve. It accounts for the current reserve allocation from a Broadcaster to an Orchestrator as well as pending winning ticket redemptions. 
+_Max float_ is the guaranteed value an Orchestrator will be able to claim from a Broadcaster's reserve. It accounts for the current reserve allocation from a Broadcaster to an Orchestrator as well as pending winning ticket redemptions. 
 
 ## TicketQueue
 
@@ -22,17 +22,19 @@ _Max float_ is the guaranteed value an Orchestrator will be able from a Broadcas
 
 ## Monitoring Max Float
 
-1. When max float for a `sender` is requested from the `RedeemerClient` but no local cache is available, an (unary) RPC call will be sent to the `RedeemerServer`. 
+*A more detailed description about `maxFloat` and it's relation to a broadcaster's reserve can be found in the [PM protocol spec](https://github.com/livepeer/wiki/blob/master/spec/streamflow/pm.md#reserve).*
+
+1. When max float for a `sender` is requested from the `RedeemerClient` but no local cache is available, an (unary) RPC call will be sent to the `Redeemer`. 
 
 2. A second RPC call to `MonitorMaxFloat(sender)` will open up a server-side gRPC stream to receive future update. 
 
 _If this call fails the response from step 1 is returned, but not kept in cache to prevent duplicate streams_
 
-3. The `RedeemerServer` go-routine started by the RPC call in step 2 will start a subscription to listen for max float changes from the `LocalSenderMonitor` for the specified `sender` using `LocalSenderMonitor.SubscribeMaxFloatChange(sender)`.
+3. The `Redeemer` go routine started by the RPC call in step 2 will start a subscription to listen for max float changes from the `LocalSenderMonitor` for the specified `sender` using `LocalSenderMonitor.SubscribeMaxFloatChange(sender)`.
 
 _Each open server-side stream will have its own subscription that will be closed when the client closes the stream. This means that each client will have a subscription for each sender it is interested in._ 
 
-4. Once the subscription from step 3 emits an event that indicates a state change for the specified `sender`, the `RedeemerServer` will invoke `LocalSenderMonitor.MaxFloat(sender)` to fetch the latest value. 
+4. Once the subscription from step 3 emits an event that indicates a state change for the specified `sender`, the `Redeemer` will invoke `LocalSenderMonitor.MaxFloat(sender)` to fetch the latest value. 
 
 5. Upon retrieving the latest max float value for `sender` it will be sent over the server-side gRPC stream.
 
