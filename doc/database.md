@@ -67,7 +67,7 @@ sessionID | STRING | Broadcast session which this ticket belongs to.
 
 ## Table `ticketQueue`
 
-**orchestrator/redeemer** only. `ticketQueue` Tracks winning tickets for probabilistic micropayments.
+**Orchestrator/Redeemer** only. `ticketQueue` Tracks winning tickets for probabilistic micropayments.
 
 Column | Type | Description
 ---|---|---
