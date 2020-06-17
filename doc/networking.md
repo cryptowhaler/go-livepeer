@@ -162,43 +162,10 @@ message PingPong {
 }
 ```
 
-### Notes
 
-The address the orchestrator uses to check availability is as follows:
-* If a `-serviceAddr` is set, use that address
-* If a Service URI is set in the Ethereum service registry, use that address
-* Otherwise, discover the node's public IP and use that address
+## Orchestrator To Redeemer
 
-## TLS Certificates
-
-Self-signed, with the DNSName field is set to the host name as specified in the registry URL. Generated anew each time a transcoder node starts up.
-
-### Notes
-Orchestrator/transcoder certificates are self-signed, and generated anew each time the node starts up. The current TLS implementation in the broadcaster will fail out if the DNSName field does not match, otherwise the self-signed certificate is not verified.
-
-IPs will also work in the DNS Name field (at least, the go client does not fail out). However, this may be problematic for orchestrators that are on unstable IPs or otherwise "move around". Arguably, orchestrators shouldn't move around, so perhaps this would serve to discourage that mode of operation.
-
-## Design Considerations
-
-### gRPC and HTTP
-
-The division of the protocol into gRPC and plain-HTTP parts may seem odd. There
-is a method to the madness: gRPC messages are encoded using Protocol Buffers,
-and Protocol Buffers was not designed to handle [large blobs of data](https://developers.google.com/protocol-buffers/docs/techniques#large-data).
-Hence, when we need to transmit a large blob (such as a video segment), the
-transmission is done through raw HTTP. For purposes other than sending large
-blobs, gRPC gives us a convenient framework for building network protocols.
-
-### Upgrade Path
-
-See the [official recommendations](https://developers.google.com/protocol-buffers/docs/proto#updating)
-for updating Protocol Buffers messages. The same principles of "add but don't
-modify or remove fields" carry over to gRPC service definitions: new services
-can be added, but names should not be changed, nor should services be removed
-unless the intent is to break backwards compatibility.
-
-
-# Redeemer networking spec 
+*Applicable when running a ticket redemption service by using the `-redeemer` flag*
 
 ### gRPC `QueueTicket`: `Ticket` -> `QueueTicketRes`
 
@@ -236,9 +203,9 @@ message MaxFloatUpdate {
 
 ### gRPC `MonitorMaxFloat`: `MaxFloatReq` -> stream `MaxFloatUpdate`
 
-`MonitorMaxFloat` is a server-side streming RPC method that is called by an Orchestrator to receive indirect max float updates for a sender. The stream will remain open until either the client or the server closes the stream or connection. 
+`MonitorMaxFloat` is a server-side streming RPC method that is called by an Orchestrator to receive max float updates for a sender. The stream will remain open until either the client or the server closes the stream or connection. 
 
-The request follows the same format as the `Maxfloat` method:
+The request follows the same format as the `MaxFloat` method:
 
 ```
 message MaxFloatReq {
@@ -246,10 +213,45 @@ message MaxFloatReq {
 }
 ```
 
-The response message also follows the same format but is now _stream_  of `MaxFloatUpdate` messages: 
+The response message also follows the same format but is now a _stream_  of `MaxFloatUpdate` messages: 
 
 ```
 message MaxFloatUpdate {
     bytes max_float= 2;
 }
 ```
+
+### Notes
+
+The address the orchestrator uses to check availability is as follows:
+* If a `-serviceAddr` is set, use that address
+* If a Service URI is set in the Ethereum service registry, use that address
+* Otherwise, discover the node's public IP and use that address
+
+## TLS Certificates
+
+Self-signed, with the DNSName field is set to the host name as specified in the registry URL. Generated anew each time a transcoder node starts up.
+
+### Notes
+Orchestrator/transcoder certificates are self-signed, and generated anew each time the node starts up. The current TLS implementation in the broadcaster will fail out if the DNSName field does not match, otherwise the self-signed certificate is not verified.
+
+IPs will also work in the DNS Name field (at least, the go client does not fail out). However, this may be problematic for orchestrators that are on unstable IPs or otherwise "move around". Arguably, orchestrators shouldn't move around, so perhaps this would serve to discourage that mode of operation.
+
+## Design Considerations
+
+### gRPC and HTTP
+
+The division of the protocol into gRPC and plain-HTTP parts may seem odd. There
+is a method to the madness: gRPC messages are encoded using Protocol Buffers,
+and Protocol Buffers was not designed to handle [large blobs of data](https://developers.google.com/protocol-buffers/docs/techniques#large-data).
+Hence, when we need to transmit a large blob (such as a video segment), the
+transmission is done through raw HTTP. For purposes other than sending large
+blobs, gRPC gives us a convenient framework for building network protocols.
+
+### Upgrade Path
+
+See the [official recommendations](https://developers.google.com/protocol-buffers/docs/proto#updating)
+for updating Protocol Buffers messages. The same principles of "add but don't
+modify or remove fields" carry over to gRPC service definitions: new services
+can be added, but names should not be changed, nor should services be removed
+unless the intent is to break backwards compatibility.
