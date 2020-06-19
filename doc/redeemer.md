@@ -6,6 +6,10 @@ It is responsible for redeeming winning tickets as well as pushing _max float_ u
 
 _Max float_ is the guaranteed value an Orchestrator will be able to claim from a Broadcaster's reserve. It accounts for the current reserve allocation from a Broadcaster to an Orchestrator as well as pending winning ticket redemptions. 
 
+\**A more detailed description about max float and it's relation to a broadcaster's reserve can be found in the [PM protocol spec](https://github.com/livepeer/wiki/blob/master/spec/streamflow/pm.md#reserve).*
+
+\**This document uses the term `sender`, it can be used interchangeably with Broadcaster.*
+
 ## TicketQueue
 
 1. The `ticketQueue` is a loop that runs everytime a new block is seen. It will then pop tickets off the queue starting with the oldest ticket first, and sends it to the `LocalSenderMonitor` for redemption if the `recipientRand` for the ticket has expired. 
@@ -21,8 +25,6 @@ _Max float_ is the guaranteed value an Orchestrator will be able to claim from a
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _This will trigger a `LocalSenderMonitor.SubscribeMaxFloatChange(ticket.sender)` notification_
 
 ## Monitoring Max Float
-
-*A more detailed description about `maxFloat` and it's relation to a broadcaster's reserve can be found in the [PM protocol spec](https://github.com/livepeer/wiki/blob/master/spec/streamflow/pm.md#reserve).*
 
 1. When max float for a `sender` is requested from the `RedeemerClient` but no local cache is available, an (unary) RPC call will be sent to the `Redeemer`. 
 
