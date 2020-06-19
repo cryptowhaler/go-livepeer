@@ -28,7 +28,7 @@ _Max float_ is the guaranteed value an Orchestrator will be able to claim from a
 
 2. A second RPC call to `MonitorMaxFloat(sender)` will open up a server-side gRPC stream to receive future update. 
 
-_If this call fails the response from step 1 is returned, but not kept in cache to prevent duplicate streams_
+_If this call fails the response from step 1 is returned, but not kept in cache to to prevent it becoming stale due to not being able to receive further updates_
 
 3. The `Redeemer` goroutine started by the RPC call in step 2 will start a subscription to listen for max float changes from the `LocalSenderMonitor` for the specified `sender` using `LocalSenderMonitor.SubscribeMaxFloatChange(sender)`.
 
