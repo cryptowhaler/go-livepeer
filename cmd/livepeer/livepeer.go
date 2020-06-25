@@ -816,6 +816,10 @@ func main() {
 			return
 		}
 
+		if *redeemer {
+			return
+		}
+
 		orch := core.NewOrchestrator(s.LivepeerNode, timeWatcher)
 
 		go func() {
