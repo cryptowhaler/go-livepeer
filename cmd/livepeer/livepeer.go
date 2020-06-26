@@ -476,17 +476,19 @@ func main() {
 		}
 
 		if *orchestrator {
-			// Set price per pixel base info
-			if *pixelsPerUnit <= 0 {
-				// Can't divide by 0
-				panic(fmt.Errorf("The amount of pixels per unit must be greater than 0, provided %d instead\n", *pixelsPerUnit))
+			if !*redeemer {
+				// Set price per pixel base info
+				if *pixelsPerUnit <= 0 {
+					// Can't divide by 0
+					panic(fmt.Errorf("The amount of pixels per unit must be greater than 0, provided %d instead\n", *pixelsPerUnit))
+				}
+				if *pricePerUnit <= 0 {
+					// Prevent orchestrator from unknowingly provide free transcoding
+					panic(fmt.Errorf("Price per unit of pixels must be greater than 0, provided %d instead\n", *pricePerUnit))
+				}
+				n.SetBasePrice(big.NewRat(int64(*pricePerUnit), int64(*pixelsPerUnit)))
+				glog.Infof("Price: %d wei for %d pixels\n ", *pricePerUnit, *pixelsPerUnit)
 			}
-			if *pricePerUnit <= 0 {
-				// Prevent orchestrator from unknowingly provide free transcoding
-				panic(fmt.Errorf("Price per unit of pixels must be greater than 0, provided %d instead\n", *pricePerUnit))
-			}
-			n.SetBasePrice(big.NewRat(int64(*pricePerUnit), int64(*pixelsPerUnit)))
-			glog.Infof("Price: %d wei for %d pixels\n ", *pricePerUnit, *pixelsPerUnit)
 
 			ev, _ := new(big.Int).SetString(*ticketEV, 10)
 			if ev == nil {
