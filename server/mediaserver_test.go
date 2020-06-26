@@ -408,7 +408,7 @@ func TestCreateRTMPStreamHandlerWebhook(t *testing.T) {
 	ts7 := makeServer(`{"manifestID":"a", "profiles": [
 		{"name": "prof1", "bitrate": 432, "fps": 560, "width": 123, "height": 456, "profile": "H264Baseline"},
 		{"name": "prof2", "bitrate": 765, "fps": 876, "fpsDen": 12, "width": 456, "height": 987},
-		{"name": "passthru_fps", "bitrate": 890, "width": 789, "height": 654, "profile": "H264ConstrainedHigh"}]}`)
+		{"name": "passthru_fps", "bitrate": 890, "width": 789, "height": 654, "profile": "H264ConstrainedHigh", "gop":"123"}]}`)
 	defer ts7.Close()
 	params = createSid(u).(*core.StreamParameters)
 	assert.Len(params.Profiles, 3)
@@ -437,6 +437,7 @@ func TestCreateRTMPStreamHandlerWebhook(t *testing.T) {
 			Framerate:    0,
 			FramerateDen: 0,
 			Profile:      ffmpeg.ProfileH264ConstrainedHigh,
+			GOP:          "123",
 		},
 	}
 
@@ -456,7 +457,7 @@ func TestCreateRTMPStreamHandlerWebhook(t *testing.T) {
 	ts9 := makeServer(`{"manifestID":"a", "presets":["P240p30fps16x9", "P720p30fps16x9"], "profiles": [
 		{"name": "prof1", "bitrate": 432, "fps": 560, "width": 123, "height": 456, "profile": "H264Baseline"},
 		{"name": "prof2", "bitrate": 765, "fps": 876, "fpsDen": 12, "width": 456, "height": 987},
-		{"name": "passthru_fps", "bitrate": 890, "width": 789, "height": 654, "profile": "H264ConstrainedHigh"}]}`)
+		{"name": "passthru_fps", "bitrate": 890, "width": 789, "height": 654, "profile": "H264ConstrainedHigh", "gop":"123"}]}`)
 
 	defer ts9.Close()
 	params = createSid(u).(*core.StreamParameters)
@@ -470,6 +471,11 @@ func TestCreateRTMPStreamHandlerWebhook(t *testing.T) {
 	defer ts10.Close()
 	params = createSid(u).(*core.StreamParameters)
 	assert.Len(params.Profiles, 0, "Unexpected value in presets")
+
+	// invalid gop
+	ts11 := makeServer(`{"manifestID":"a", "profiles": [ {"gop": " 1 "}]`)
+	defer ts11.Close()
+	assert.Nil(createSid(u))
 }
 
 func TestCreateRTMPStreamHandler(t *testing.T) {

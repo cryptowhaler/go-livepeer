@@ -201,6 +201,7 @@ func FFmpegProfiletoNetProfile(ffmpegProfiles []ffmpeg.VideoProfile) ([]*net.Vid
 			FpsDen:  uint32(profile.FramerateDen),
 			Format:  format,
 			Profile: encoderProf,
+			Gop:     profile.GOP,
 		}
 		profiles = append(profiles, &fullProfile)
 	}

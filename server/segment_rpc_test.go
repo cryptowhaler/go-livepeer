@@ -325,6 +325,20 @@ func TestGenSegCreds_FullProfiles(t *testing.T) {
 	assert.Empty(segData.FullProfiles)
 	assert.Empty(segData.FullProfiles2)
 
+	// Check that FullProfiles3 is used if any profile has a GOP set
+	s.Profiles[0].Profile = ffmpeg.ProfileNone // unset Profile as that also triggers FullProfile3
+	s.Profiles[1].GOP = "123"
+	data, err = genSegCreds(s, seg)
+	assert.Nil(err)
+	buf, err = base64.StdEncoding.DecodeString(data)
+	assert.Nil(err)
+	expectedProfiles, err = common.FFmpegProfiletoNetProfile(profiles)
+	assert.Nil(err)
+	assert.Equal(expectedProfiles[1].Gop, "123")
+	assert.Empty(segData.FullProfiles)
+	assert.Empty(segData.FullProfiles2)
+	assert.Equal([]byte("invalid"), segData.Profiles)
+
 	// Check that profile format errors propagate
 	s.Profiles[1].Format = -1
 	data, err = genSegCreds(s, seg)
@@ -439,6 +453,7 @@ func TestMakeFfmpegVideoProfiles(t *testing.T) {
 			Bitrate: int32(321),
 			Fps:     uint32(198),
 			Profile: net.VideoProfile_H264_BASELINE,
+			Gop:     "123",
 		},
 	}
 
@@ -461,6 +476,7 @@ func TestMakeFfmpegVideoProfiles(t *testing.T) {
 			Resolution:   fmt.Sprintf("%dx%d", videoProfiles[1].Width, videoProfiles[1].Height),
 			Format:       ffmpeg.FormatMPEGTS,
 			Profile:      ffmpeg.ProfileH264Baseline,
+			GOP:          "123",
 		},
 	}
 

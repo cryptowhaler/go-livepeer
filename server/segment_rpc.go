@@ -251,6 +251,7 @@ func makeFfmpegVideoProfiles(protoProfiles []*net.VideoProfile) ([]ffmpeg.VideoP
 			Resolution:   fmt.Sprintf("%dx%d", profile.Width, profile.Height),
 			Format:       format,
 			Profile:      encoderProf,
+			GOP:          profile.Gop,
 		}
 		profiles = append(profiles, prof)
 	}

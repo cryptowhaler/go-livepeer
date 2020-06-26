@@ -106,6 +106,7 @@ type authWebhookResponse struct {
 		FPS     uint   `json:"fps"`
 		FPSDen  uint   `json:"fpsDen"`
 		Profile string `json:"profile"`
+		GOP     string `json:gop`
 	} `json:"profiles"`
 }
 
@@ -206,6 +207,13 @@ func createRTMPStreamIDHandler(s *LivepeerServer) func(url *url.URL) (strmID str
 						profile.Height,
 						profile.Bitrate)
 				}
+				if profile.GOP != "" {
+					_, err := strconv.ParseFloat(profile.GOP, 64)
+					if err != nil {
+						glog.Error("Invalid GOP from webhook err=", err)
+						return nil
+					}
+				}
 				prof := ffmpeg.VideoProfile{
 					Name:         name,
 					Bitrate:      fmt.Sprint(profile.Bitrate),
@@ -213,6 +221,7 @@ func createRTMPStreamIDHandler(s *LivepeerServer) func(url *url.URL) (strmID str
 					FramerateDen: profile.FPSDen,
 					Resolution:   fmt.Sprintf("%dx%d", profile.Width, profile.Height),
 					Profile:      common.EncoderProfileNameToValue(profile.Profile),
+					GOP:          profile.GOP,
 				}
 				profiles = append(profiles, prof)
 			}
